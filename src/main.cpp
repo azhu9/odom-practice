@@ -12,7 +12,7 @@ ez::Drive chassis(
     {11, 12, -13, 14},  // Right Chassis Ports (negative port will reverse it!)
 
     10,      // IMU Port
-    3.25,  // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
+    3.404,  // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
     450);   // Wheel RPM = cartridge * (motor gear / wheel gear)
 
 // Uncomment the trackers you're using here!
@@ -20,7 +20,7 @@ ez::Drive chassis(
 //  - you should get positive values on the encoders going FORWARD and RIGHT
 // - `2.75` is the wheel diameter
 // - `4.0` is the distance from the center of the wheel to the center of the robot
-ez::tracking_wheel horiz_tracker(6, 2, 1.0);  // This tracking wheel is perpendicular to the drive wheels
+ez::tracking_wheel horiz_tracker(-6, 2.2, 1.0);  // This tracking wheel is perpendicular to the drive wheels
 ez::tracking_wheel vert_tracker(5, 2, 4.8);   // This tracking wheel is parallel to the drive wheels
 
 /**
@@ -58,6 +58,7 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
+      {"testing", working},
       {"Drive\n\nDrive forward and come back", drive_example},
       {"Turn\n\nTurn 3 times.", turn_example},
       {"Drive and Turn\n\nDrive forward, turn, come back", drive_and_turn},
@@ -149,6 +150,7 @@ void screen_print_tracker(ez::tracking_wheel *tracker, std::string name, int lin
   ez::screen_print(tracker_value + tracker_width, line);  // Print final tracker text
 }
 
+
 /**
  * Ez screen task
  * Adding new pages here will let you view them during user control or autonomous
@@ -163,16 +165,18 @@ void ez_screen_task() {
         // If we're on the first blank page...
         if (ez::as::page_blank_is_on(0)) {
           // Display X, Y, and Theta
-          ez::screen_print("x: " + util::to_string_with_precision(chassis.odom_x_get()) +
-                               "\ny: " + util::to_string_with_precision(chassis.odom_y_get()) +
-                               "\na: " + util::to_string_with_precision(chassis.odom_theta_get()),
-                           1);  // Don't override the top Page line
+          // ez::screen_print("x: " + util::to_string_with_precision(chassis.odom_x_get()) +
+          //                      "\ny: " + util::to_string_with_precision(chassis.odom_y_get()) +
+          //                      "\na: " + util::to_string_with_precision(chassis.odom_theta_get()),
+          //                  1);  // Don't override the top Page line
 
-          // Display all trackers that are being used
-          screen_print_tracker(chassis.odom_tracker_left, "l", 4);
-          screen_print_tracker(chassis.odom_tracker_right, "r", 5);
-          screen_print_tracker(chassis.odom_tracker_back, "b", 6);
-          screen_print_tracker(chassis.odom_tracker_front, "f", 7);
+          // // Display all trackers that are being used
+          // screen_print_tracker(chassis.odom_tracker_left, "l", 4);
+          // screen_print_tracker(chassis.odom_tracker_right, "r", 5);
+          // screen_print_tracker(chassis.odom_tracker_back, "b", 6);
+          // screen_print_tracker(chassis.odom_tracker_front, "f", 7);
+          ez::screen_print("Horizontal: " + util::to_string_with_precision(horiz_tracker.get()) +
+                   "\nVertical: " + util::to_string_with_precision(vert_tracker.get()), 1);
         }
       }
     }
@@ -205,11 +209,12 @@ void ez_template_extras() {
     //  When enabled:
     //  * use A and Y to increment / decrement the constants
     //  * use the arrow keys to navigate the constants
-    if (master.get_digital_new_press(DIGITAL_X))
+    if (master.get_digital_new_press(DIGITAL_X)){
       chassis.pid_tuner_toggle();
+    }
 
     // Trigger the selected autonomous routine
-    if (master.get_digital(DIGITAL_B) && master.get_digital(DIGITAL_DOWN)) {
+    if (master.get_digital(DIGITAL_R1)) {
       pros::motor_brake_mode_e_t preference = chassis.drive_brake_get();
       autonomous();
       chassis.drive_brake_set(preference);
@@ -257,8 +262,14 @@ void opcontrol() {
     // Put more user control code here!
     // . . .
 
-    ez::screen_print(to_string(horiz_tracker.get()), 1);
-    ez::screen_print(to_string(vert_tracker.get()), 2);
+    // ez::screen_print(to_string(horiz_tracker.get()), 7);
+    // ez::screen_print(to_string(vert_tracker.get()), 8);
+
+    if (master.get_digital(DIGITAL_L1)) {
+  chassis.drive_sensor_reset();
+  horiz_tracker.reset();
+  vert_tracker.reset();
+}
 
     pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
   }
