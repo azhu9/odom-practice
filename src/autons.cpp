@@ -1,5 +1,4 @@
 #include "main.h"
-#include "pros/motors.h"
 
 /////
 // For installation, upgrading, documentations, and tutorials, check out our website!
@@ -16,9 +15,9 @@ const int SWING_SPEED = 110;
 ///
 void default_constants() {
   // P, I, D, and Start I
-  chassis.pid_drive_constants_set(30.0, 0.0, 130.0);         // Fwd/rev constants, used for odom and non odom motions
+  chassis.pid_drive_constants_set(20.0, 0.0, 100.0);         // Fwd/rev constants, used for odom and non odom motions
   chassis.pid_heading_constants_set(11.0, 0.0, 20.0);        // Holds the robot straight while going forward without odom
-  chassis.pid_turn_constants_set(5.0, 0.05, 35.0, 15.0);     // Turn in place constants
+  chassis.pid_turn_constants_set(3.0, 0.05, 20.0, 15.0);     // Turn in place constants
   chassis.pid_swing_constants_set(6.0, 0.0, 65.0);           // Swing constants
   chassis.pid_odom_angular_constants_set(6.5, 0.0, 52.5);    // Angular control for odom motions
   chassis.pid_odom_boomerang_constants_set(5.8, 0.0, 32.5);  // Angular control for boomerang motions
@@ -52,27 +51,6 @@ void default_constants() {
 ///
 // Drive Example
 ///
-void working(){
-  chassis.drive_brake_set(pros::E_MOTOR_BRAKE_COAST);
-  // chassis.pid_odom_set(30_in, 127, false);
-  chassis.pid_odom_set({{0_in, 24_in, 0_deg}, fwd, 127});
-
-  chassis.pid_wait_until(20_in);
-  chassis.drive_brake_set(pros::E_MOTOR_BRAKE_HOLD);
-
-  chassis.pid_odom_set({{0_in, 0_in, 0_deg}, rev, 110});
-  chassis.pid_wait();
-
-
-
-
-  // chassis.pid_odom_set(-12_in, DRIVE_SPEED);
-  // chassis.pid_wait();
-
-  // chassis.pid_odom_set(-12_in, DRIVE_SPEED);
-  // chassis.pid_wait();
-}
-
 void drive_example() {
   // The first parameter is target inches
   // The second parameter is max speed the robot will drive at
@@ -247,9 +225,6 @@ void tug(int attempts) {
 // If interfered, the robot will drive forward and then attempt to drive backward.
 void interfered_example() {
   chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
-  chassis.pid_wait();
-
-  chassis.pid_drive_set(-24_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 
   if (chassis.interfered) {
